@@ -1,0 +1,86 @@
+import tkinter
+window = tkinter.Tk()
+window.geometry('1000x900')#ширина x длина
+window.title('Registration')
+window.configure(background='#7D7C7C')
+
+label1=tkinter.Label(text='Name:',
+                      font=('Franklin Gothic Medium',22),
+                      background='#7D7C7C',
+                      foreground='black'
+                      )
+label1.place(x=90,y=70)
+
+entry1=tkinter.Entry(font=('Arial Rounded MT Bold',25),
+                      background='white')
+entry1.place(x=350,y=69)
+
+label2=tkinter.Label(text='Surname:',
+                      font=('Franklin Gothic Medium',22),
+                      background='#7D7C7C',
+                      foreground='black'
+                      )
+label2.place(x=90,y=170)
+
+entry2=tkinter.Entry(font=('Arial Rounded MT Bold',25),
+                      background='white')
+entry2.place(x=350,y=170)
+
+label3=tkinter.Label(text='Login:',
+                      font=('Franklin Gothic Medium',22),
+                      background='#7D7C7C',
+                      foreground='black'
+                      )
+label3.place(x=90,y=275)
+
+entry3=tkinter.Entry(font=('Arial Rounded MT Bold',25),
+                      background='white')
+entry3.place(x=350,y=275)
+
+label4=tkinter.Label(text='Password:',
+                      font=('Franklin Gothic Medium',22),
+                      background='#7D7C7C',
+                      foreground='black'
+                      )
+label4.place(x=90,y=385)
+
+entry4=tkinter.Entry(font=('Arial Rounded MT Bold',25),
+                      background='white')
+entry4.place(x=350,y=385)
+
+label5=tkinter.Label(text='Phone Number:',
+                      font=('Franklin Gothic Medium',22),
+                      background='#7D7C7C',
+                      foreground='black'
+                      )
+label5.place(x=90,y=490)
+
+entry4=tkinter.Entry(font=('Arial Rounded MT Bold',25),
+                      background='white')
+entry4.place(x=350,y=490)
+
+button1=tkinter.Button(text='Send',
+                       font=('Bahnschrift Semilight',28),
+                       background='white',
+                       foreground='black',
+                       
+)
+button1.place(x=200,y=590)
+
+button2=tkinter.Button(text='Clear',
+                       font=('Bahnschrift Semilight',28),
+                       background='white',
+                       foreground='black',
+                       
+)
+button2.place(x=650,y=590)
+
+button3=tkinter.Button(text='Exit',
+                       font=('Bahnschrift Semilight',28),
+                       background='white',
+                       foreground='black',
+                       
+)
+button3.place(x=440,y=690)
+
+window.mainloop()

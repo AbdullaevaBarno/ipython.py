@@ -1,0 +1,166 @@
+#import psycopg2
+#Magliwmatlar bazasina jalganiw
+#try:
+#       conn = psycopg2.connect(
+#        dbname="Avtosalon",#Baza ati
+#        user="root",#paydalaniwshi
+#        password="11111111",#parol
+#        host="localhost",#xost
+       
+#    )
+#       print("Jalganiw tabisli!")
+# except Exception as e:
+#      print(f"jalganiwda qatelik juz berdi: {e}")
+#Kurs jaratiw
+#cur = conn.cursor()
+#SELECT sorawin jiberiw
+#cur.execute("SELECT ati, brend_id, bahasi FROM telefonlar")
+#Soraw natiyjesin aliw
+#rows = cur.fetchall()
+#Natiyjelerdi shigariw
+#for row in rows:
+#   print(f"Telefon: {row[0]},
+#           Brend_id: {row[1]}, Bahasi: {row[2]}")
+#kursorni jabiw
+#cur.close()
+
+import sqlite3
+from tkinter import *
+from tkinter import messagebox
+from tkinter import ttk
+
+class PhoneStore:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AvtoSalon")
+        self.root.geometry("800x700")
+
+        # SQLite bazasın járatiw
+        self.conn = sqlite3.connect('phones.db')
+        self.create_table()
+
+        # Dizayn elementleri
+        self.memory_label = Label(root, text="Ati:")
+        self.memory_label.grid(row=3, column=0, padx=5, pady=5)
+        self.memory_entry = Entry(root)
+        self.memory_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        self.brand_label = Label(root, text="Brend:")
+        self.brand_label.grid(row=0, column=0, padx=5, pady=5)
+        self.brand_entry = Entry(root)
+        self.brand_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.model_label = Label(root, text="Model:")
+        self.model_label.grid(row=1, column=0, padx=5, pady=5)
+        self.model_entry = Entry(root)
+        self.model_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        self.price_label = Label(root, text="Bahası:")
+        self.price_label.grid(row=2, column=0, padx=5, pady=5)
+        self.price_entry = Entry(root)
+        self.price_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        self.memory_label = Label(root, text="Reni:")
+        self.memory_label.grid(row=3, column=0, padx=5, pady=5)
+        self.memory_entry = Entry(root)
+        self.memory_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        # Túymeler
+        self.add_button = Button(root, text="Qosıw", command=self.add_phone)
+        self.add_button.grid(row=4, column=0, columnspan=2, pady=10)
+
+        self.delete_button = Button(root, text="Óshiriw", command=self.delete_phone)
+        self.delete_button.grid(row=4, column=1, pady=10)
+
+        self.search_button = Button(root, text="İzlew", command=self.search_phones)
+        self.search_button.grid(row=4, column=2, pady=10)
+
+        # Telefonlar dizimin kórsetiw ushın keste
+        self.tree = ttk.Treeview(root, columns=("ID", "Brend", "Model", "Baha", "Yad"), show="headings")
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Brend", text="Brend")
+        self.tree.heading("Model", text="Model")
+        self.tree.heading("Baha", text="Baha")
+        self.tree.heading("Yad", text="Yad")
+        self.tree.grid(row=5, column=0, columnspan=4, padx=5, pady=5)
+
+        # Kesteni tolıq kórsetiw
+        self.show_all_phones()
+
+    def create_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS phones (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                brand TEXT,
+                model TEXT,
+                price REAL,
+                memory INTEGER
+            )
+        ''')
+        self.conn.commit()
+
+    def add_phone(self):
+        brand = self.brand_entry.get()
+        model = self.model_entry.get()
+        price = self.price_entry.get()
+        memory = self.memory_entry.get()
+
+        if brand and model and price and memory:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO phones (brand, model, price, memory)
+                VALUES (?, ?, ?, ?)
+            ''', (brand, model, float(price), int(memory)))
+            self.conn.commit()
+            messagebox.showinfo("Tabıs", "Telefon qosıldı!")
+            self.clear_entries()
+            self.show_all_phones()
+        else:
+            messagebox.showerror("Qáte", "Barlıq maydanlardı toltırıń!")
+
+    def delete_phone(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            phone_id = self.tree.item(selected_item[0])['values'][0]
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE FROM phones WHERE id=?", (phone_id,))
+            self.conn.commit()
+            messagebox.showinfo("Tabıs", "Telefon óshirildi!")
+            self.show_all_phones()
+        else:
+            messagebox.showerror("Qáte", "Óshiriw ushın telefon saylań!")
+
+    def search_phones(self):
+        search_term = self.brand_entry.get()
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT * FROM phones 
+            WHERE brand LIKE ? OR model LIKE ?
+        ''', (f'%{search_term}%', f'%{search_term}%'))
+        
+        self.tree.delete(*self.tree.get_children())
+        for row in cursor.fetchall():
+            self.tree.insert('', 'end', values=row)
+
+    def show_all_phones(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM phones")
+        
+        self.tree.delete(*self.tree.get_children())
+        for row in cursor.fetchall():
+            self.tree.insert('', 'end', values=row)
+
+    def clear_entries(self):
+        self.brand_entry.delete(0, END)
+        self.model_entry.delete(0, END)
+        self.price_entry.delete(0, END)
+        self.memory_entry.delete(0, END)
+
+    def __del__(self):
+        self.conn.close()
+
+if __name__ == "__main__":
+    root = Tk()
+    app = PhoneStore(root)
+    root.mainloop()

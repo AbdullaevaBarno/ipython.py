@@ -1,0 +1,141 @@
+import sqlite3
+from tkinter import *
+from tkinter import messagebox
+from tkinter import ttk
+
+class AvtoSalon:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AvtoSalon")
+        self.root.geometry("1200x1100")
+
+        # SQLite bazasin jaratiw
+        self.conn = sqlite3.connect('avtosalon.db')
+        self.create_table()
+
+        # Dizayn elementleri
+        Label(root, text="Ati:").grid(row=0, column=0, padx=5, pady=5)
+        self.ati_entry = Entry(root)
+        self.ati_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        Label(root, text="Brend:").grid(row=1, column=0, padx=5, pady=5)
+        self.brend_entry = Entry(root)
+        self.brend_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        Label(root, text="Model:").grid(row=2, column=0, padx=5, pady=5)
+        self.model_entry = Entry(root)
+        self.model_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        Label(root, text="Bahasi:").grid(row=3, column=0, padx=5, pady=5)
+        self.baha_entry = Entry(root)
+        self.baha_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        Label(root, text="Reni:").grid(row=4, column=0, padx=5, pady=5)
+        self.reni_entry = Entry(root)
+        self.reni_entry.grid(row=4, column=1, padx=5, pady=5)
+
+        # Knopkalar
+        Button(root, text="Qosiw", command=self.add_car).grid(row=5, column=0, pady=10)
+        Button(root, text="Oshiriw", command=self.delete_car).grid(row=5, column=1, pady=10)
+        Button(root, text="Izlew", command=self.search_cars).grid(row=5, column=2, pady=10)
+        Button(root, text="Hammesin korsetiw", command=self.show_all_cars).grid(row=5, column=3, pady=10)
+        Button(root, text="Tazalaw", command=self.clear_entries).grid(row=5, column=4, pady=10)
+
+        # Tablica (Treeview)
+        self.tree = ttk.Treeview(root, columns=("ID", "Ati", "Brend", "Model", "Bahasi", "Reni"), show="headings")
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Ati", text="Ati")
+        self.tree.heading("Brend", text="Brend")
+        self.tree.heading("Model", text="Model")
+        self.tree.heading("Bahasi", text="Bahasi")
+        self.tree.heading("Reni", text="Reni")
+        self.tree.grid(row=6, column=0, columnspan=5, padx=5, pady=5)
+
+        self.show_all_cars()
+
+    # Tablica jaratiw
+    def create_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS avtomobiller (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ati TEXT,
+                brend TEXT,
+                model TEXT,
+                bahasi REAL,
+                reni TEXT
+            )
+        ''')
+        self.conn.commit()
+
+    # Avtomobil qosiw
+    def add_car(self):
+        ati = self.ati_entry.get()
+        brend = self.brend_entry.get()
+        model = self.model_entry.get()
+        bahasi = self.baha_entry.get()
+        reni = self.reni_entry.get()
+
+        if ati and brend and model and bahasi and reni:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO avtomobiller (ati, brend, model, bahasi, reni)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (ati, brend, model, float(bahasi), reni))
+            self.conn.commit()
+            messagebox.showinfo("Tabisli", "Kiritilgen avtomobil qosildi!")
+            self.clear_entries()
+            self.show_all_cars()
+        else:
+            messagebox.showerror("Qatelik", "Hamme qatarlardi toliqtirin!")
+
+    # Avtomobil oshiriw
+    def delete_car(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            car_id = self.tree.item(selected_item[0])['values'][0]
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE FROM avtomobiller WHERE id=?", (car_id,))
+            self.conn.commit()
+            messagebox.showinfo("Tabisli", "Avtomobil oshirildi!")
+            self.show_all_cars()
+        else:
+            messagebox.showerror("Qatelik", "Oshiriw ushin avtomobil tanlan!")
+        # Izlew
+    def search_cars(self):
+        search_term = self.nomi_entry.get()
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT * FROM avtomobiller 
+            WHERE nomi LIKE ? OR brend LIKE ? OR model LIKE ?
+        ''', (f'%{search_term}%', f'%{search_term}%', f'%{search_term}%'))
+
+        self.tree.delete(*self.tree.get_children())
+        for row in cursor.fetchall():
+            self.tree.insert('', 'end', values=row)
+
+    # Hamme avtomobillerdi korsetiw
+    def show_all_cars(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM avtomobiller")
+
+        self.tree.delete(*self.tree.get_children())
+        for row in cursor.fetchall():
+            self.tree.insert('', 'end', values=row)
+
+    # Magliwmatlardi tazalasw
+    def clear_entries(self):
+        self.ati_entry.delete(0, END)
+        self.brend_entry.delete(0, END)
+        self.model_entry.delete(0, END)
+        self.baha_entry.delete(0, END)
+        self.reni_entry.delete(0, END)
+
+    def __del__(self):
+        self.conn.close()
+
+# Programmani qosiw
+if __name__ == "__main__":
+    root = Tk()
+    app = AvtoSalon(root)
+    root.mainloop()

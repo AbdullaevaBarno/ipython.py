@@ -1,0 +1,36 @@
+#333
+import pandas as pd
+import numpy as np
+#Magliwmatlardi jaratiw
+studentler_data= {
+     'ati': ['Polatbek', 'Nawrizbek', 'Begler_begi', 'Aytgul', 'Tumaris', 'Barno', 'Tursinay', 'Ruslan', 'Malika', 'Aynura'],
+     'JI': [99,88,80,79,90,95,86,77,89,96],
+     'matematika': [90,89,77,75,98,95,87,90,91,85],
+     'fizika': [86,88,90,78,77,90,95,85,79,96]
+ }
+#DataFrame jaratiw
+df=pd.DataFrame(studentler_data,index=range(1,11))
+print("Keste korinisinde: ")
+print(df)
+#Oratasha bahani esaplaw
+orta_baha_JI=df['JI'].mean()
+orta_baha_matematika=df['matematika'].mean()
+orta_baha_fizika=df['fizika'].mean()
+print("Ortasha bahasi:")
+print(f"JI: {orta_baha_JI}")
+
+#333
+import pandas as pd
+import numpy as np
+#Magliwmatlardi jaratiw
+qalalar_data= {
+     'Qala ati': ['Qonirat', 'Taxtakopir', 'Shomanay', 'Shimbay', 'Qanlikol', 'Tortkul', 'Nokis', 'Xojjeli', 'Xaliqabad', 'Moynaq'],
+     'Xaliq_sani': [150000,100000,50000,60000,70000,40000,80000,750000,650000,900000],
+ }
+#DataFrame jaratiw
+df=pd.DataFrame(qalalar_data,index=range(1,11))
+print("Keste korinisinde: ")
+print(df)
+#Xalqi 100000 nan asatugin qalalar sanin esaplaw
+qala_sani=df[df['Xaliq_sani']>100000]
+print(f"Xalqi 100000 nan asatugin qalalar sani:\n{qala_sani}")

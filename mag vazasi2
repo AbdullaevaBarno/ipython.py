@@ -1,0 +1,141 @@
+import psycopg2
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+class MobilePhones:
+    def __init__(self):
+        # PostgreSQL bazasına jalǵanıw
+        self.baza_jalganiw()
+        
+        # Tiykarǵı tereze
+        self.tereze = tk.Tk()
+        self.tereze.title("Mobil phones - Maǵlıwmatlar Bazası")
+        self.tereze.geometry("1000x600")
+
+        # Kiris formasi
+        self.form_frame = ttk.LabelFrame(self.tereze, text="Telefon maǵliwmatlarin kiritiw")
+        self.form_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
+
+        # Kiris maydanları
+        labels = ['Brend:', 'Brend_id:', 'Bahasi ($):', 'Yad kólemi (GB):', 
+                 'Kamera ólshemi:', 'Batareya (mAh):', 'Shigarilgan_sane:']
+        self.entries = {}
+        
+        for i, label in enumerate(labels):
+            ttk.Label(self.form_frame, text=label).grid(row=i, column=0, padx=5, pady=5)
+            self.entries[label] = ttk.Entry(self.form_frame)
+            self.entries[label].grid(row=i, column=1, padx=5, pady=5)
+
+        # Túymeler paneli
+        self.buttons_frame = ttk.Frame(self.tereze)
+        self.buttons_frame.grid(row=1, column=0, pady=10)
+
+        ttk.Button(self.buttons_frame, text="Qosıw", command=self.telefon_qosiw).grid(row=0, column=0, padx=5)
+        ttk.Button(self.buttons_frame, text="Jańalaw", command=self.telefon_janalaw).grid(row=0, column=1, padx=5)
+        ttk.Button(self.buttons_frame, text="Óshiriw", command=self.telefon_oshiriw).grid(row=0, column=2, padx=5)
+        ttk.Button(self.buttons_frame, text="Tazalaw", command=self.formani_tazalaw).grid(row=0, column=3, padx=5)
+
+        # Telefonlar kestesi
+        self.tree_frame = ttk.Frame(self.tereze)
+        self.tree_frame.grid(row=2, column=0, columnspan=2, padx=10, sticky="nsew")
+
+        self.tree = ttk.Treeview(self.tree_frame, columns=("id", "brend", "brend_id", "bahasi", 
+                                "yad", "kamera", "batareya", "jil", "Shigarilgan_sane"), 
+                                show="headings")
+
+        for col in self.tree["columns"]:
+            self.tree.heading(col, text=col.capitalize())
+
+        self.tree.grid(row=0, column=0, sticky="nsew")
+
+        # Sırdırma
+        scrollbar = ttk.Scrollbar(self.tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        self.telefonlardi_koriw()
+        self.tereze.mainloop()
+
+    def baza_jalganiw(self):
+        try:
+            self.conn = psycopg2.connect(
+                dbname="mobile_phones",
+                user="postgres",
+                password="12345678",
+                host="localhost",
+                port="5432"
+            )
+            self.cursor = self.conn.cursor()
+            self.table_jarat()
+        except Exception as e:
+            messagebox.showerror("Qáte", f"Bazaǵa jalǵaniwda qátelik: {str(e)}")
+
+    def table_jarat(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS telefonlar (
+                id SERIAL PRIMARY KEY,
+                brend VARCHAR(100),
+                brend_id VARCHAR(100),
+                bahasi DECIMAL(10,2),
+                yad INTEGER,
+                kamera VARCHAR(50),
+                batareya INTEGER,
+                jil INTEGER,
+                shigarilgan_sane TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        self.conn.commit()
+
+    def telefon_qosiw(self):
+        try:
+            brend = self.entries['Brend:'].get()
+            brend_id = self.entries['Brend_id:'].get()
+            bahasi = float(self.entries['Bahasi ($):'].get())
+            yad = int(self.entries['Yad kólemi (GB):'].get())
+            kamera = self.entries['Kamera ólshemi:'].get()
+            batareya = int(self.entries['Batareya (mAh):'].get())
+            jil = int(self.entries['Shigarilgan_sane:'].get())
+            self.cursor.execute('''
+                INSERT INTO telefonlar (brend, brend_id, bahasi, yad, kamera, batareya, jil)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ''', (brend, brend_id, bahasi, yad, kamera, batareya, jil))
+            
+            self.conn.commit()
+            self.telefonlardi_koriw()
+            self.formani_tazalaw()
+            messagebox.showinfo("Tabisli", "Telefon bazaǵa qosildi!")
+            
+        except Exception as e:
+            messagebox.showerror("Qáte", f"Maǵliwmatlardi kiritiwde qátelik: {str(e)}")
+
+    def telefon_janalaw(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Eskertiw", "Jańalaw ushin telefon saylań!")
+            return
+
+        telefon = self.tree.item(selected_item)['values']
+        try:
+            self.cursor.execute('''
+                UPDATE telefonlar 
+                SET brend = %s, brend_id = %s, bahasi = %s, yad = %s, 
+                    kamera = %s, batareya = %s, jil = %s
+                WHERE id = %s
+            ''', (
+                self.entries['Brend:'].get(),
+                self.entries['Brend_id:'].get(),
+                float(self.entries['Bahasi ($):'].get()),
+                int(self.entries['Yad kólemi (GB):'].get()),
+                self.entries['Kamera ólshemi:'].get(),
+                int(self.entries['Batareya (mAh):'].get()),
+                int(self.entries['Shigarilgan_sane:'].get()),
+                telefon[0]
+            ))
+            self.conn.commit()
+            self.telefonlardi_koriw()
+            messagebox.showinfo("Tabisli", "Ma'lumotlar yangilandi!")
+        except Exception as e:
+            messagebox.showerror("Xato", str(e))
+
+if __name__ == "__main__":
+    MobilePhones()

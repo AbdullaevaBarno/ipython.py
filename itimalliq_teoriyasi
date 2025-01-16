@@ -1,0 +1,99 @@
+#ittimalliqqa esaplar
+
+import random
+#13
+# Parametrler
+total_cards = 100
+desired_card = 1
+trials = 100000  # Simulyatsiya sani
+success_count = 0
+
+for _ in range(trials):
+    # 100 kartoshkadan 10 nin tawekel tanlaw
+    drawn_cards = random.sample(range(total_cards), 10)
+    
+    # Eger kerekli kartoshka tanlangan bolsa
+    if 0 in drawn_cards:  # 0 - kerekli kartoshka
+        success_count = success_count + 1
+
+# itimalligin esaplaw
+probability = success_count / trials
+print(f"Kerekli kartoshka shigiw itimali: {probability:.4f}")
+
+#12
+from math import comb
+
+# Magliwmatlar
+total_details = 15      # Uluwmaliq detallardin sani
+colored_details = 10    # Boyalgan detallardin sani
+chosen_details = 3      # Jiynawshi alatugin detallardin sani
+
+# Uluwmaliq kombinatsiyalar
+total_combinations = comb(total_details, chosen_details)
+
+# Tek boyalgan detallardan 3 wi tanlaw
+colored_combinations = comb(colored_details, chosen_details)
+
+# Itimalligin esaplaw
+probability = colored_combinations / total_combinations
+
+# Natiyjeni shigariw
+print(f"Boyalgan detallardin itimalligi: {probability:.4f}")
+
+#16
+from math import comb
+
+# Uliwmaliq sanlar sani
+total_numbers = 10  
+# Tanlanatugin sanlar soni
+chosen_numbers = 3  
+
+# Uliwmaliq kombinatsiyalar
+total_combinations = comb(total_numbers, chosen_numbers)
+
+# Har bir san turli boliw sharti, ol jagdayda kombinatsiyalar usi boladi
+favorable_combinations = total_combinations  
+
+# Itimalligin esaplaw
+probability = favorable_combinations / (total_numbers ** chosen_numbers)
+
+# Natiyjeni shigariw
+print(f"Kerekli sanlar terilgen boliw itimalligi: {probability:.4f}")
+
+#13 2-jollari
+import random
+
+# Parametrlar
+total_cards = 100  # Uluwma kartochkalar sani
+desired_card = 1   # Kerekli kartochka sani (1 ta)
+trials = 100000    # Simulyatsiya sani
+success_count = 0  # duris shiqqan sinawlar sani
+
+for _ in range(trials):
+    # 100 kartochkadan 10 nin tawekeline tanlaw
+    drawn_cards = random.sample(range(total_cards), 10)  # 0 dan 99 ga deyin bolgan sanlar
+
+    # Eger kerekli kartochka tanlangan bolsa
+    if 0 in drawn_cards:  # 0 - kerakli kartochka
+        success_count += 1  # Muvaffaqiyatli sinovni hisoblash
+
+# Itimalliqti esaplaw
+probability = success_count / trials
+print(f"Itimaldagi kartochka boliwi: {probability:.4f}")
+
+#13 
+from math import comb
+
+# 100 fotokartochka, olardan 1 wi kerekli
+total_cards = 100
+desired_card = 1
+not_desired_cards = total_cards - desired_card
+
+# 10 fotokartochka aliw
+cards_to_draw = 10
+
+# Itimalligin esaplaw
+P_not_desired = comb(not_desired_cards, cards_to_draw) / comb(total_cards, cards_to_draw)
+P_desired = 1 - P_not_desired
+
+print(f"Itimaldagi kartochka boliwi: {P_desired:.4f}")
